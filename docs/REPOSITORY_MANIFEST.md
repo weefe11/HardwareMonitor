@@ -1,6 +1,6 @@
 # Состав репозитория
 
-В Git входят 46 файлов. Список соответствует подготовленному индексу и финальному коммиту. Все пути ниже относительны к корню репозитория.
+В Git входят 48 файлов. Список соответствует подготовленному индексу и финальному коммиту. Все пути ниже относительны к корню репозитория.
 
 ## Основной проект
 
@@ -12,6 +12,7 @@
 - `HardwareMonitor/ColorPickerWindow.xaml`
 - `HardwareMonitor/ColorPickerWindow.xaml.cs`
 - `HardwareMonitor/ColorSpectrum.cs`
+- `HardwareMonitor/CpuLoadTopology.cs`
 - `HardwareMonitor/DiagnosticsWindow.xaml`
 - `HardwareMonitor/DiagnosticsWindow.xaml.cs`
 - `HardwareMonitor/HardwareItem.cs`
@@ -57,6 +58,7 @@
 - `docs/LAPTOP_CHECKLIST.md`
 - `docs/REPOSITORY_MANIFEST.md`
 - `docs/THIRD_PARTY.md`
+- `docs/TESTED_HARDWARE.md`
 - `README.md`
 
 ## GitHub Actions
