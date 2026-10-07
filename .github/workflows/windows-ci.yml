@@ -1,0 +1,33 @@
+name: Windows CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Установить .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+      - name: Восстановить зависимости
+        run: dotnet restore HardwareMonitor.sln
+      - name: Собрать Release
+        run: dotnet build HardwareMonitor.sln -c Release --no-restore -warnaserror
+      - name: Запустить проверки
+        run: dotnet test HardwareMonitor.sln -c Release --no-build --no-restore --logger "trx;LogFileName=windows-ci.trx" --results-directory .artifacts/test-results
+      - name: Сохранить результаты
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-test-results
+          path: .artifacts/test-results/*.trx
+          if-no-files-found: warn

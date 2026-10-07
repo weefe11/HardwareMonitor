@@ -1,0 +1,36 @@
+# Visual Studio / editors
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build and test output
+**/bin/
+**/obj/
+**/TestResults/
+*.nupkg
+*.snupkg
+*.log
+*.tmp
+*.bak
+.artifacts/
+artifacts/
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+**/settings.json
+**/appsettings.Local.json
+*.pfx
+*.p12
+*.key
+*.pem
+
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
