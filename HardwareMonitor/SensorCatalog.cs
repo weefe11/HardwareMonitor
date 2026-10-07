@@ -57,8 +57,8 @@ public static partial class SensorCatalog
                 AddBest(MetricKind.CpuClock, "Средняя частота", SensorType.Clock, "Cores (Average)", "Cores (Average Effective)");
                 foreach (var core in list.Where(s => s.Type is SensorType.Load or SensorType.Clock or SensorType.Temperature)
                     .Select(s => (Reading: s, Match: CorePattern().Match(s.Name))).Where(p => p.Match.Success)
-                    .GroupBy(p => (p.Reading.Type, Core: int.Parse(p.Match.Groups[1].Value),
-                        Thread: p.Match.Groups[2].Success ? int.Parse(p.Match.Groups[2].Value) : (int?)null))
+                    .GroupBy(p => (p.Reading.Type, Core: p.Reading.PhysicalCoreNumber ?? int.Parse(p.Match.Groups[1].Value),
+                        Thread: p.Reading.PhysicalThreadNumber ?? (p.Match.Groups[2].Success ? int.Parse(p.Match.Groups[2].Value) : (int?)null)))
                     .OrderBy(g => g.Key.Core).ThenBy(g => g.Key.Thread))
                 {
                     var reading = core.OrderBy(p => SensorFormatting.ValidValue(p.Reading.Value).HasValue ? 0 : 1)
@@ -66,7 +66,11 @@ public static partial class SensorCatalog
                         .ThenBy(p => p.Reading.Identifier, StringComparer.Ordinal).First().Reading;
                     string name = $"Ядро {core.Key.Core}" + (core.Key.Thread is int thread ? $" · поток {thread}" : "");
                     var kind = core.Key.Type == SensorType.Load ? MetricKind.CoreLoad : core.Key.Type == SensorType.Clock ? MetricKind.CoreClock : MetricKind.CoreTemperature;
-                    string key = $"{root.Key}::{kind}:{core.Key.Core}:{core.Key.Thread}";
+                    // Keep existing selection keys when correcting a backend's logical-core labels.
+                    var sourceMatch = CorePattern().Match(reading.Name);
+                    int sourceCore = int.Parse(sourceMatch.Groups[1].Value);
+                    int? sourceThread = sourceMatch.Groups[2].Success ? int.Parse(sourceMatch.Groups[2].Value) : null;
+                    string key = $"{root.Key}::{kind}:{sourceCore}:{sourceThread}";
                     result.Add(new SensorDefinition(key, name, kind, reading, core.Key.Core, core.Key.Thread));
                 }
                 if (!result.Any(s => s.Kind == MetricKind.CpuClock && s.Reading.RootId == root.Key))

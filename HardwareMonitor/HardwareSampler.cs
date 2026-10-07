@@ -9,7 +9,11 @@ namespace HardwareMonitor;
 
 // Only the worker owns library objects; the UI receives value snapshots.
 public sealed record SensorReading(string Identifier, string Name, SensorType Type, float? Value,
-    string HardwareId, string HardwareName, string RootId, string RootName, HardwareType RootType);
+    string HardwareId, string HardwareName, string RootId, string RootName, HardwareType RootType)
+{
+    public int? PhysicalCoreNumber { get; init; }
+    public int? PhysicalThreadNumber { get; init; }
+}
 
 public sealed record HardwareSnapshot(IReadOnlyList<SensorReading> Sensors, string Status,
     DateTime Timestamp, IReadOnlyList<string> Errors);
@@ -58,6 +62,7 @@ public sealed class HardwareSampler
         var readings = new List<SensorReading>();
         var errors = new List<string>();
         foreach (var root in hardware) ReadHardware(root, root, readings, errors);
+        CpuLoadTopology.Correct(hardware, readings);
         if (!cpuAccess)
         {
             // Some library backends return zero for a failed MSR read. Software CPU load remains valid.
