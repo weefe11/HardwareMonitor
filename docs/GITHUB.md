@@ -1,14 +1,12 @@
-# Публикация и выпуск v1.0.0
+# Поддержка и выпуск версий
 
-Репозиторий: https://github.com/weefe11/HardwareMonitor. Основная ветка — `main`, решение — `HardwareMonitor.sln`. Репозиторий уже создан; существующий `origin` не нужно добавлять повторно.
+Репозиторий: https://github.com/weefe11/HardwareMonitor. Основная ветка — `main`, решение — `HardwareMonitor.sln`.
 
-**Описание для GitHub:** Русскоязычный мониторинг компьютера для игр и работы: лёгкий прозрачный виджет, выбор показателей и диагностика аппаратных датчиков.
-
-**Темы:** `csharp`, `dotnet`, `wpf`, `windows`, `hardware-monitoring`, `overlay`, `librehardwaremonitor`, `pawnio`.
+Текущий стабильный релиз: **v1.0.0**. Репозиторий публичный; готовые сборки публикуются в [GitHub Releases](https://github.com/weefe11/HardwareMonitor/releases).
 
 ## Получить исходники и проверить
 
-Нужны Windows, Git for Windows и .NET SDK 8 или новее. Для приватного репозитория используйте учётную запись с доступом; авторизацию выполняйте через браузер/менеджер учётных данных, без пароля или токена в URL.
+Нужны Windows, Git for Windows и .NET SDK 8 или новее.
 
 ```powershell
 git clone https://github.com/weefe11/HardwareMonitor.git
@@ -19,18 +17,32 @@ dotnet test -c Release --no-build --no-restore
 & ./HardwareMonitor/bin/Release/net8.0-windows/HardwareMonitor.exe
 ```
 
-Если clone уже есть: `git status`, затем `git pull --ff-only` при чистом рабочем дереве. Не переносите чужие `bin`, `obj` и настройки. Для аппаратных датчиков установите при необходимости подписанный [PawnIO](https://pawnio.eu/) и подтвердите UAC при запуске EXE. После установки драйвера перезапустите приложение.
+Если clone уже есть: сначала `git status`, затем `git pull --ff-only` при чистом рабочем дереве. Не переносите старые `bin`, `obj` и локальные настройки между машинами.
 
-Если Git не доступен в PATH, установите Git for Windows и откройте новый терминал; в Visual Studio можно использовать её встроенный Git. [Подтверждённое оборудование](TESTED_HARDWARE.md), [список исходников](REPOSITORY_MANIFEST.md).
+Для низкоуровневых аппаратных датчиков при необходимости установите отдельно подписанный [PawnIO](https://pawnio.eu/) и подтвердите UAC при запуске приложения. После установки драйвера перезапустите HardwareMonitor.
 
-## Внести изменение и отправить в main
+[Проверенное оборудование](TESTED_HARDWARE.md) · [Состав репозитория](REPOSITORY_MANIFEST.md).
 
-Закройте приложение через «Выход» в трее перед сборкой. На новом ПК настройте своё имя и адрес автора локально для репозитория через `git config user.name` и `git config user.email`; можно использовать GitHub noreply.
+## Проверить GitHub Actions
+
+Workflow **Windows CI** запускается при push, pull request и вручную.
+
+Он выполняет:
+
+`restore → Release build с -warnaserror → NUnit tests`
+
+Для каждого нового коммита проверяйте отдельный результат во вкладке **Actions**. Успех предыдущего запуска не подтверждает новый commit.
+
+CI использует моделируемые аппаратные данные и WPF-проверки и не заменяет ручную проверку на реальном железе. Результаты тестов сохраняются в артефакте `windows-test-results`.
+
+## Внести изменение
+
+Перед сборкой закройте приложение через «Выход» в трее.
 
 ```powershell
 git status
 git pull --ff-only
-# Внесите исправления.
+# Внесите изменение.
 dotnet build -c Release -warnaserror
 dotnet test -c Release --no-build
 git add <изменённые-файлы>
@@ -38,34 +50,60 @@ git commit -m "Describe the change"
 git push origin main
 ```
 
-Проверьте `git remote -v`: он должен указывать на ваш репозиторий. Если origin отсутствует только в новой самостоятельно созданной копии, используйте `git remote add origin https://github.com/weefe11/HardwareMonitor.git`. Не используйте force push. Настройки, аппаратные отчёты, логи и готовые сборки не добавляйте в исходный Git.
+На новом компьютере при необходимости настройте автора локально для репозитория:
 
-## Проверить GitHub Actions
+```powershell
+git config user.name "Your Name"
+git config user.email "YOUR_GITHUB_NOREPLY"
+```
 
-Откройте **Actions → Windows CI → запуск для отправленного коммита**. Нужен зелёный результат `build-and-test`: restore → Release с `-warnaserror` → 13 NUnit-сценариев. При ошибке откройте упавший шаг; результаты тестов доступны в артефакте `windows-test-results`. Успех предыдущего коммита не доказывает успех нового.
-
-CI использует моделируемые датчики и настоящие элементы WPF, без PawnIO и реальной аппаратной проверки. В приватном репозитории значок может быть недоступен без авторизации. [Журналы Actions](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs).
+Не используйте force push без отдельной необходимости. Локальные настройки, аппаратные отчёты, логи, `.artifacts`, `bin` и `obj` в исходный Git не добавляются.
 
 ## Готовая сборка
 
-Для обычного запуска используйте ZIP приложения из [Releases](https://github.com/weefe11/HardwareMonitor/releases). Распакуйте все файлы: EXE требует соседние DLL. Нужны **Windows x64 и .NET Desktop Runtime 8 x64**; Runtime и PawnIO в архив не входят. Не используйте папку проверки `package-smoke`: она содержит инструменты тестирования, которых нет в пользовательском пакете.
+Для обычного запуска используйте ZIP приложения из [Releases](https://github.com/weefe11/HardwareMonitor/releases). Распакуйте архив полностью и запускайте `HardwareMonitor.exe`.
 
-Воспроизводимая подготовка пакета:
+Требования к готовой сборке:
+
+- Windows x64;
+- .NET Desktop Runtime 8 x64;
+- PawnIO устанавливается отдельно, если нужен низкоуровневый доступ к датчикам;
+- соседние DLL и ресурсы из ZIP должны оставаться рядом с EXE.
+
+Воспроизводимая публикация:
 
 ```powershell
-dotnet publish HardwareMonitor/HardwareMonitor.csproj -c Release -r win-x64 --self-contained false -o .artifacts/v1.0.0-release/HardwareMonitor -p:Version=1.0.0 -p:DebugType=None -p:DebugSymbols=false -warnaserror
+dotnet publish HardwareMonitor/HardwareMonitor.csproj -c Release -r win-x64 --self-contained false -o .artifacts/release/HardwareMonitor -p:DebugType=None -p:DebugSymbols=false -warnaserror
 ```
 
-При архивировании сохраните подготовленные `ПРОЧИТАТЬ.txt`, `THIRD_PARTY.md`, `BUILD-INFO.txt` и папку `Licenses`. В `BUILD-INFO.txt` укажите фактический commit сборки, версию и требования. Тестовые DLL/EXE и PDB в пользовательский ZIP не включайте. Сборочные каталоги и ZIP исключены из исходного Git; их место — GitHub Releases.
+Перед архивированием проверьте, что в пакете сохранены пользовательские инструкции, сведения о сторонних компонентах и их лицензии. Тестовый проект, PDB и локальные отчёты в пользовательский ZIP не включаются.
 
-## Опубликовать стабильный v1.0.0
+## Выпуск новой версии
 
-После зелёного CI для текущего main откройте **Releases → Draft a new release**. Выберите новый тег **v1.0.0** на проверенном коммите ветки main. Не перемещайте уже существующий тег.
+Для следующего стабильного выпуска:
 
-Название: **Мониторинг ПК 1.0.0**. Возьмите краткое описание из CHANGELOG, прикрепите `HardwareMonitor-v1.0.0-win-x64.zip` и файл SHA-256. Укажите Runtime 8 x64, отдельную установку PawnIO и ссылку на проверенное оборудование. Флажок prerelease для стабильного v1.0.0 отключите. Можно сначала сохранить черновик.
+1. Убедитесь, что `main` содержит только нужные изменения и рабочее дерево чистое.
+2. Выполните clean/restore, Release-сборку с `-warnaserror` и весь test suite.
+3. Проверьте новый commit во вкладке **Actions** — workflow должен завершиться успешно.
+4. Если изменение связано с аппаратной совместимостью, повторите ручную проверку на подходящем реальном железе.
+5. Обновите `CHANGELOG.md`, а при изменении подтверждённой совместимости — `TESTED_HARDWARE.md`.
+6. Соберите новый ZIP и файл SHA-256.
+7. Создайте новый тег вида `vX.Y.Z` на проверенном commit ветки `main`.
+8. Создайте GitHub Release, приложите ZIP и SHA-256 и укажите реальные требования/ограничения.
 
-## Сделать репозиторий публичным
+Не перемещайте уже опубликованные стабильные теги на другой commit.
 
-Просмотрите историю и убедитесь, что в ней нет секретов/личных отчётов. В **Settings → General → Danger Zone → Change repository visibility → Change to public** подтвердите смену видимости. [Инструкция GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/managing-repository-settings/setting-repository-visibility).
+## Текущий релиз v1.0.0
 
-Проверки двух компьютеров завершены; ограничения перечислены в README и TESTED_HARDWARE. Публикация Release и смена видимости остаются отдельными действиями владельца. Собственная лицензия пока не выбрана: для свободного использования собственного кода подходит MIT, если владелец согласен с её условиями. Публичная видимость не заменяет лицензию; лицензии зависимостей действуют отдельно.
+Стабильный **v1.0.0** опубликован и проверен на двух физических конфигурациях:
+
+- Intel Core i3-14100F + NVIDIA GeForce RTX 5060;
+- AMD Ryzen 7 7840HS + AMD Radeon 780M Graphics.
+
+Также выполнены NUnit-тесты и Windows CI. Подробности, границы проверки и недоступные датчики перечислены в [TESTED_HARDWARE.md](TESTED_HARDWARE.md).
+
+## Лицензирование
+
+Собственная лицензия проекта пока не выбрана. Публичная видимость репозитория сама по себе не даёт разрешения на свободное использование, изменение или распространение исходного кода.
+
+Лицензии сторонних компонентов перечислены в [THIRD_PARTY.md](THIRD_PARTY.md).
